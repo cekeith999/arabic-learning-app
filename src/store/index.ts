@@ -1,4 +1,4 @@
-import { create } fromzustand';
+import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { 
   User, 
@@ -24,16 +24,16 @@ interface AppStore extends AppState {
   updateConversationDuration: (duration: number) => void;
   
   // Vocabulary Actions
-  setVocabulary: (vocabulary: Vocabularyd;
+  setVocabulary: (vocabulary: Vocabulary[]) => void;
   addVocabulary: (vocabulary: Vocabulary) => void;
   markVocabularyAsLearned: (vocabularyId: string) => void;
   
   // Achievement Actions
-  setAchievements: (achievements: Achievement> void;
+  setAchievements: (achievements: Achievement[]) => void;
   addAchievement: (achievement: Achievement) => void;
   
   // Notification Actions
-  setNotifications: (notifications: Notification
+  setNotifications: (notifications: Notification[]) => void;
   addNotification: (notification: Notification) => void;
   markNotificationAsRead: (notificationId: string) => void;
   clearNotifications: () => void;
@@ -55,15 +55,17 @@ interface AppStore extends AppState {
 }
 
 const initialAudioSettings: AudioSettings = {
-  volume:0.8speed: 1.0,
+  volume: 0.8,
+  speed: 1.0,
   autoPlay: false,
   pronunciationGuide: true,
 };
 
-const initialState: AppState =[object Object]  user: null,
+const initialState: AppState = {
+  user: null,
   isAuthenticated: false,
   currentConversation: null,
-  vocabulary: ],
+  vocabulary: [],
   achievements: [],
   notifications: [],
   audioSettings: initialAudioSettings,
@@ -73,15 +75,16 @@ const initialState: AppState =[object Object]  user: null,
 
 export const useAppStore = create<AppStore>()(
   persist(
-    (set, get) => ([object Object]   ...initialState,
-      
+    (set, get) => ({
+      ...initialState,
       // User Actions
       setUser: (user) => set({ user }),
       updateUserXP: (xp) => {
         const currentUser = get().user;
-        if (currentUser)[object Object]         const newXP = currentUser.xp + xp;
-          const newLevel = Math.floor(newXP / 10+ 1;
-          set([object Object]
+        if (currentUser) {
+          const newXP = currentUser.xp + xp;
+          const newLevel = Math.floor(newXP / 10) + 1;
+          set({
             user: {
               ...currentUser,
               xp: newXP,
@@ -93,7 +96,8 @@ export const useAppStore = create<AppStore>()(
       },
       updateUserStreak: (streak) => {
         const currentUser = get().user;
-        if (currentUser) [object Object] set([object Object]
+        if (currentUser) {
+          set({
             user: {
               ...currentUser,
               streak,
@@ -103,7 +107,8 @@ export const useAppStore = create<AppStore>()(
       },
       updateUserLingots: (lingots) => {
         const currentUser = get().user;
-        if (currentUser) [object Object] set([object Object]
+        if (currentUser) {
+          set({
             user: {
               ...currentUser,
               lingots: currentUser.lingots + lingots,
@@ -112,12 +117,12 @@ export const useAppStore = create<AppStore>()(
         }
       },
       setAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
-      
       // Conversation Actions
       setCurrentConversation: (conversation) => set({ currentConversation: conversation }),
       addMessageToConversation: (message) => {
         const currentConversation = get().currentConversation;
-        if (currentConversation) [object Object] set({
+        if (currentConversation) {
+          set({
             currentConversation: {
               ...currentConversation,
               messages: [...currentConversation.messages, message],
@@ -127,7 +132,8 @@ export const useAppStore = create<AppStore>()(
       },
       updateConversationDuration: (duration) => {
         const currentConversation = get().currentConversation;
-        if (currentConversation) [object Object] set({
+        if (currentConversation) {
+          set({
             currentConversation: {
               ...currentConversation,
               duration,
@@ -135,7 +141,6 @@ export const useAppStore = create<AppStore>()(
           });
         }
       },
-      
       // Vocabulary Actions
       setVocabulary: (vocabulary) => set({ vocabulary }),
       addVocabulary: (vocabulary) => {
@@ -144,11 +149,11 @@ export const useAppStore = create<AppStore>()(
           vocabulary: [...currentVocabulary, vocabulary],
         });
       },
-      markVocabularyAsLearned: (vocabularyId) =>[object Object]     // This would typically update the user's vocabulary progress
+      markVocabularyAsLearned: (vocabularyId) => {
+        // This would typically update the user's vocabulary progress
         // For now, we'll just log it
         console.log(`Vocabulary ${vocabularyId} marked as learned`);
       },
-      
       // Achievement Actions
       setAchievements: (achievements) => set({ achievements }),
       addAchievement: (achievement) => {
@@ -161,15 +166,14 @@ export const useAppStore = create<AppStore>()(
         // Add notification
         get().addNotification({
           id: Date.now().toString(),
-          userId: get().user?.id || ,
-          type: 'achievement,
+          userId: get().user?.id || '',
+          type: 'achievement',
           title: 'Achievement Unlocked!',
           message: `You earned the "${achievement.badgeName}" badge!`,
           isRead: false,
           createdAt: new Date(),
         });
       },
-      
       // Notification Actions
       setNotifications: (notifications) => set({ notifications }),
       addNotification: (notification) => {
@@ -189,7 +193,6 @@ export const useAppStore = create<AppStore>()(
         });
       },
       clearNotifications: () => set({ notifications: [] }),
-      
       // Audio Settings Actions
       setAudioSettings: (settings) => {
         const currentSettings = get().audioSettings;
@@ -197,19 +200,17 @@ export const useAppStore = create<AppStore>()(
           audioSettings: { ...currentSettings, ...settings },
         });
       },
-      
       // Loading and Error Actions
       setLoading: (isLoading) => set({ isLoading }),
       setError: (error) => set({ error }),
-      
       // Gamification Actions
       awardXP: (xp) => {
         get().updateUserXP(xp);
         // Add XP notification
         get().addNotification({
           id: Date.now().toString(),
-          userId: get().user?.id || ,
-          type: 'achievement,
+          userId: get().user?.id || '',
+          type: 'achievement',
           title: 'XP Earned!',
           message: `+${xp} XP`,
           isRead: false,
@@ -221,8 +222,8 @@ export const useAppStore = create<AppStore>()(
         // Add Lingot notification
         get().addNotification({
           id: Date.now().toString(),
-          userId: get().user?.id || ,
-          type: 'achievement,
+          userId: get().user?.id || '',
+          type: 'achievement',
           title: 'Lingots Earned!',
           message: `+${lingots} Lingots`,
           isRead: false,
@@ -231,10 +232,11 @@ export const useAppStore = create<AppStore>()(
       },
       checkLevelUp: () => {
         const currentUser = get().user;
-        if (currentUser)[object Object]         const newLevel = Math.floor(currentUser.xp / 10 +1
+        if (currentUser) {
+          const newLevel = Math.floor(currentUser.xp / 10) + 1;
           if (newLevel > currentUser.level) {
             // Level up notification
-            get().addNotification([object Object]
+            get().addNotification({
               id: Date.now().toString(),
               userId: currentUser.id,
               type: 'level-up',
@@ -246,11 +248,10 @@ export const useAppStore = create<AppStore>()(
           }
         }
       },
-      
       // Reset Actions
       resetStore: () => set(initialState),
     }),
- [object Object]
+    {
       name: 'arabic-learning-store',
       partialize: (state) => ({
         user: state.user,

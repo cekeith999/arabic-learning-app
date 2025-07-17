@@ -4,7 +4,7 @@ export interface User {
   email: string;
   name: string;
   level: number;
-  dialectPreference:MSA' |Egyptian;
+  dialectPreference: 'MSA' | 'Egyptian';
   xp: number;
   streak: number;
   lingots: number;
@@ -12,7 +12,8 @@ export interface User {
   lastActive: Date;
 }
 
-export interface UserProgress [object Object]  userId: string;
+export interface UserProgress {
+  userId: string;
   vocabularyCount: number;
   quizScore: number;
   lastActive: Date;
@@ -38,7 +39,8 @@ export interface StreakData {
   streakBonus: number;
 }
 
-export interface LeaderboardEntry [object Object]  userId: string;
+export interface LeaderboardEntry {
+  userId: string;
   name: string;
   xp: number;
   level: number;
@@ -54,7 +56,8 @@ export interface Conversation {
   createdAt: Date;
   duration: number;
   messages: Message[];
-  vocabularyLearned: stringctions: Correction[];
+  vocabularyLearned: string[];
+  corrections: Correction[];
 }
 
 export interface Message {
@@ -77,24 +80,26 @@ export interface Correction {
 }
 
 // Vocabulary Types
-export interface Vocabulary[object Object]id: string;
+export interface Vocabulary {
+  id: string;
   arabicWord: string;
   englishTranslation: string;
   transliteration: string;
   audioUrl: string;
   imageUrl?: string;
   category: string;
-  difficulty: 'beginner| intermediate' | 'advanced';
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
   exampleSentence?: string;
   culturalNote?: string;
 }
 
-export interface UserVocabulary [object Object]  userId: string;
+export interface UserVocabulary {
+  userId: string;
   vocabularyId: string;
   learnedAt: Date;
   reviewCount: number;
   lastReviewed: Date;
-  masteryLevel: number; // 00
+  masteryLevel: number; // 0-100
   nextReviewDate: Date;
 }
 
@@ -102,7 +107,7 @@ export interface UserVocabulary [object Object]  userId: string;
 export interface Quiz {
   id: string;
   userId: string;
-  type: 'vocabulary' | 'grammar| conversation | istening;
+  type: 'vocabulary' | 'grammar' | 'conversation' | 'listening';
   score: number;
   totalQuestions: number;
   xpEarned: number;
@@ -110,10 +115,11 @@ export interface Quiz {
   questions: QuizQuestion[];
 }
 
-export interface QuizQuestion[object Object]id: string;
+export interface QuizQuestion {
+  id: string;
   quizId: string;
   question: string;
-  questionType:multiple-choice| 'fill-blank' | 'audio' | 'matching';
+  questionType: 'multiple-choice' | 'fill-blank' | 'audio' | 'matching';
   options?: string[];
   correctAnswer: string;
   explanation: string;
@@ -123,7 +129,8 @@ export interface QuizQuestion[object Object]id: string;
 }
 
 // Skill Tree Types
-export interface Skill[object Object]id: string;
+export interface Skill {
+  id: string;
   name: string;
   description: string;
   icon: string;
@@ -136,7 +143,8 @@ export interface Skill[object Object]id: string;
   prerequisites: string[];
 }
 
-export interface SkillTree[object Object] skills: Skill];
+export interface SkillTree {
+  skills: Skill[];
   userProgress: Record<string, number>; // skillId -> progress percentage
 }
 
@@ -145,7 +153,7 @@ export interface CulturalInsight {
   id: string;
   title: string;
   content: string;
-  category: 'greetings' | food' | 'customs' | 'history' | 'language';
+  category: 'greetings' | 'food' | 'customs' | 'history' | 'language';
   unlockRequirement: string;
   isUnlocked: boolean;
   imageUrl?: string;
@@ -154,8 +162,10 @@ export interface CulturalInsight {
 }
 
 // Audio Types
-export interface AudioSettings [object Object]  volume: number;
-  speed: number; // 0.5.0 autoPlay: boolean;
+export interface AudioSettings {
+  volume: number;
+  speed: number;
+  autoPlay: boolean;
   pronunciationGuide: boolean;
 }
 
@@ -163,7 +173,7 @@ export interface AudioSettings [object Object]  volume: number;
 export interface Notification {
   id: string;
   userId: string;
-  type:streak' |achievement | reminder' | 'level-up;
+  type: 'streak' | 'achievement' | 'reminder' | 'level-up';
   title: string;
   message: string;
   isRead: boolean;
@@ -192,7 +202,7 @@ export interface AppState {
   user: User | null;
   isAuthenticated: boolean;
   currentConversation: Conversation | null;
-  vocabulary: Vocabulary];
+  vocabulary: Vocabulary[];
   achievements: Achievement[];
   notifications: Notification[];
   audioSettings: AudioSettings;
@@ -201,10 +211,11 @@ export interface AppState {
 }
 
 // Learning Path Types
-export interface LearningPath[object Object]id: string;
+export interface LearningPath {
+  id: string;
   name: string;
   description: string;
-  difficulty: 'beginner| intermediate' | 'advanced';
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
   estimatedDuration: number; // in minutes
   skills: string[];
   vocabulary: string[];
@@ -213,17 +224,19 @@ export interface LearningPath[object Object]id: string;
 }
 
 // Mini-Game Types
-export interface MiniGame[object Object]id: string;
+export interface MiniGame {
+  id: string;
   name: string;
-  type: 'matching' |translation |pronunciation' | 'memory';
+  type: 'matching' | 'translation' | 'pronunciation' | 'memory';
   description: string;
   xpReward: number;
   timeLimit?: number;
-  difficulty:easy' | 'medium | ard';
+  difficulty: 'easy' | 'medium' | 'hard';
   isUnlocked: boolean;
 }
 
-export interface GameSession[object Object]id: string;
+export interface GameSession {
+  id: string;
   gameId: string;
   userId: string;
   score: number;
