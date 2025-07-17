@@ -7,7 +7,8 @@ import type {
   Achievement, 
   Notification, 
   AudioSettings,
-  AppState 
+  AppState,
+  Message
 } from '@/types';
 
 interface AppStore extends AppState {
@@ -20,7 +21,7 @@ interface AppStore extends AppState {
   
   // Conversation Actions
   setCurrentConversation: (conversation: Conversation | null) => void;
-  addMessageToConversation: (message: any) => void;
+  addMessageToConversation: (message: Message) => void;
   updateConversationDuration: (duration: number) => void;
   
   // Vocabulary Actions

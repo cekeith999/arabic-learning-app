@@ -2,6 +2,7 @@ import { type ClassValue } from 'clsx';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { LEVEL_THRESHOLDS, XP_REWARDS } from './constants';
+import type { Vocabulary } from '@/types';
 
 // Utility function for combining CSS classes
 export function cn(...inputs: ClassValue[]) {
@@ -98,11 +99,11 @@ export function preloadAudio(url: string): Promise<void> {
 }
 
 // Vocabulary Utilities
-export function getVocabularyByCategory(vocabulary: any[], category: string) {
+export function getVocabularyByCategory(vocabulary: Vocabulary[], category: string): Vocabulary[] {
   return vocabulary.filter(vocab => vocab.category === category);
 }
 
-export function getVocabularyByDifficulty(vocabulary: any[], difficulty: string) {
+export function getVocabularyByDifficulty(vocabulary: Vocabulary[], difficulty: string): Vocabulary[] {
   return vocabulary.filter(vocab => vocab.difficulty === difficulty);
 }
 
@@ -153,7 +154,7 @@ export function checkAchievementEligibility(
 }
 
 // Local Storage Utilities
-export function saveToLocalStorage(key: string, value: any): void {
+export function saveToLocalStorage(key: string, value: unknown): void {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (error) {
@@ -204,7 +205,7 @@ export function handleError(error: unknown): string {
 }
 
 // Performance Utilities
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown) => any>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -215,7 +216,7 @@ export function debounce<T extends (...args: any[]) => any>(
   };
 }
 
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown) => any>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
