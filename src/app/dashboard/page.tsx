@@ -8,11 +8,33 @@ import RecentActivity from "@/components/gamification/RecentActivity";
 import SkillTree from "@/components/gamification/SkillTree";
 import { useAppStore } from "@/store";
 import { calculateLevel, calculateProgressToNextLevel } from "@/lib/utils";
+import type { User } from "@/types";
+
+// Default user for demo purposes
+const defaultUser: User = {
+  id: "demo-user-1",
+  email: "demo@arabiclearning.com",
+  name: "Ahmed",
+  level: 1,
+  dialectPreference: "MSA",
+  xp: 150,
+  streak: 3,
+  lingots: 25,
+  createdAt: new Date(),
+  lastActive: new Date(),
+};
 
 export default function DashboardPage() {
-  const { user } = useAppStore();
+  const { user, setUser } = useAppStore();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [progressToNextLevel, setProgressToNextLevel] = useState(0);
+
+  useEffect(() => {
+    // Initialize default user if none exists
+    if (!user) {
+      setUser(defaultUser);
+    }
+  }, [user, setUser]);
 
   useEffect(() => {
     if (user) {
