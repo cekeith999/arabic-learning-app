@@ -1,51 +1,43 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import DashboardHeader from "@/components/gamification/DashboardHeader";
 import ProgressOverview from "@/components/gamification/ProgressOverview";
 import QuickActions from "@/components/gamification/QuickActions";
 import RecentActivity from "@/components/gamification/RecentActivity";
 import SkillTree from "@/components/gamification/SkillTree";
+import ProfileSettings from "@/components/auth/ProfileSettings";
 import { useAppStore } from "@/store";
 import { calculateLevel, calculateProgressToNextLevel } from "@/lib/utils";
-import type { User } from "@/types";
-
-// Default user for demo purposes
-const defaultUser: User = {
-  id: "demo-user-1",
-  email: "demo@arabiclearning.com",
-  name: "Ahmed",
-  level: 1,
-  dialectPreference: "MSA",
-  xp: 150,
-  streak: 3,
-  lingots: 25,
-  createdAt: new Date(),
-  lastActive: new Date(),
-};
+import { LogOut } from "lucide-react";
 
 export default function DashboardPage() {
-  const { user, setUser } = useAppStore();
+  const router = useRouter();
+  const { user, isAuthenticated, setUser, setAuthenticated } = useAppStore();
   const [currentLevel, setCurrentLevel] = useState(1);
   const [progressToNextLevel, setProgressToNextLevel] = useState(0);
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
-    // Initialize default user if none exists
-    if (!user) {
-      setUser(defaultUser);
+    if (!isAuthenticated || !user) {
+      router.push("/");
+      return;
     }
-  }, [user, setUser]);
 
-  useEffect(() => {
-    if (user) {
-      const level = calculateLevel(user.xp);
-      const progress = calculateProgressToNextLevel(user.xp);
-      setCurrentLevel(level);
-      setProgressToNextLevel(progress);
-    }
-  }, [user]);
+    const level = calculateLevel(user.xp);
+    const progress = calculateProgressToNextLevel(user.xp);
+    setCurrentLevel(level);
+    setProgressToNextLevel(progress);
+  }, [user, isAuthenticated, router]);
 
-  if (!user) {
+  const handleLogout = () => {
+    setUser(null);
+    setAuthenticated(false);
+    router.push("/");
+  };
+
+  if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="text-center">
@@ -56,9 +48,53 @@ export default function DashboardPage() {
     );
   }
 
+  if (showProfile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="max-w-4xl p-6">
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={() => setShowProfile(false)}
+              className="text-indigo-600 hover:text-indigo-700 medium"
+            >
+              ← Back to Dashboard
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-2 text-gray-600 hover:text-gray-800"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </button>
+          </div>
+          <ProfileSettings />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between pt-6">
+          <div></div>
+          <div className="flex space-x-4">
+            <button
+              onClick={() => setShowProfile(true)}
+              className="text-indigo-600 hover:text-indigo-700 medium"
+            >
+              Profile Settings
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-2 text-gray-600 hover:text-gray-800"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+        
         <DashboardHeader user={user} />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
