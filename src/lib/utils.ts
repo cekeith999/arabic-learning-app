@@ -205,7 +205,7 @@ export function handleError(error: unknown): string {
 }
 
 // Performance Utilities
-export function debounce<T extends (...args: unknown) => any>(
+export function debounce<T extends (...args: unknown[]) => void>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -216,7 +216,7 @@ export function debounce<T extends (...args: unknown) => any>(
   };
 }
 
-export function throttle<T extends (...args: unknown) => any>(
+export function throttle<T extends (...args: unknown[]) => void>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
