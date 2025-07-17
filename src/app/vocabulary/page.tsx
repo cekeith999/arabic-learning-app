@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useAppStore } from "@/store";
-import { ArrowLeft, Play, Volume2, BookOpen, Target, Star } from "lucide-react";
+import { ArrowLeft, Play, Volume2, BookOpen, Target, Star, RefreshCw, Loader2 } from "lucide-react";
 import Link from "next/link";
 import type { Vocabulary } from "@/types";
 
-// Sample vocabulary data
+// Sample vocabulary data (fallback)
 const sampleVocabulary: Vocabulary[] = [
   {
     id: "1",
@@ -70,6 +70,11 @@ const categories = [
   { id: "greetings", name: "Greetings", icon: "👋", count: 2 },
   { id: "introductions", name: "Introductions", icon: "🤝", count: 1 },
   { id: "food-drinks", name: "Food & Drinks", icon: "🍽️", count: 2 },
+  { id: "family", name: "Family", icon: "👨‍👩‍👧‍👦", count: 0 },
+  { id: "numbers", name: "Numbers", icon: "🔢", count: 0 },
+  { id: "weather", name: "Weather", icon: "🌤️", count: 0 },
+  { id: "colors", name: "Colors", icon: "🎨", count: 0 },
+  { id: "animals", name: "Animals", icon: "🐾", count: 0 },
 ];
 
 export default function VocabularyPage() {
@@ -78,12 +83,65 @@ export default function VocabularyPage() {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [learnedWords, setLearnedWords] = useState<string[]>([]);
+  const [vocabulary, setVocabulary] = useState<Vocabulary[]>(sampleVocabulary);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const filteredVocabulary = selectedCategory 
-    ? sampleVocabulary.filter(word => word.category === selectedCategory)
-    : sampleVocabulary;
+    ? vocabulary.filter(word => word.category === selectedCategory)
+    : vocabulary;
 
   const currentWord = filteredVocabulary[currentWordIndex];
+
+  const generateNewVocabulary = async (category: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('/api/generate-vocabulary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          category,
+          difficulty: 'beginner',
+          count: 5
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setVocabulary(prev => [...prev, ...data.vocabulary]);
+        setCurrentWordIndex(0);
+      } else {
+        setError(data.error || 'Failed to generate vocabulary');
+      }
+    } catch (err) {
+      setError('Network error. Please check your connection.');
+      console.error('Error generating vocabulary:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCategorySelect = async (categoryId: string) => {
+    setSelectedCategory(selectedCategory === categoryId ? null : categoryId);
+    setCurrentWordIndex(0);
+    
+    // Generate new vocabulary for categories that don't have any words yet
+    const categoryWords = vocabulary.filter(word => word.category === categoryId);
+    if (categoryWords.length === 0) {
+      await generateNewVocabulary(categoryId);
+    }
+  };
+
+  const handleRefreshVocabulary = async () => {
+    if (selectedCategory) {
+      await generateNewVocabulary(selectedCategory);
+    }
+  };
 
   const handlePlayAudio = () => {
     setIsPlaying(true);
@@ -133,35 +191,66 @@ export default function VocabularyPage() {
           )}
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-700">{error}</p>
+          </div>
+        )}
+
         {/* Categories */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Categories</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {categories.map((category) => (
-              <motion.button
-                key={category.id}
-                onClick={() => {
-                  setSelectedCategory(selectedCategory === category.id ? null : category.id);
-                  setCurrentWordIndex(0);
-                }}
-                className={`p-4 rounded-xl border-2 transition-all ${
-                  selectedCategory === category.id
-                    ? "border-indigo-500 bg-indigo-50"
-                    : "border-gray-200 bg-white hover:border-indigo-300"
-                }`}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Categories</h2>
+            {selectedCategory && (
+              <button
+                onClick={handleRefreshVocabulary}
+                disabled={isLoading}
+                className="flex items-center space-x-2 px-3 py-2 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 disabled:opacity-50"
               >
-                <div className="text-2xl mb-2">{category.icon}</div>
-                <h3 className="font-semibold text-gray-900">{category.name}</h3>
-                <p className="text-sm text-gray-600">{category.count} words</p>
-              </motion.button>
-            ))}
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4" />
+                )}
+                <span>Generate More</span>
+              </button>
+            )}
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {categories.map((category) => {
+              const categoryWords = vocabulary.filter(word => word.category === category.id);
+              return (
+                <motion.button
+                  key={category.id}
+                  onClick={() => handleCategorySelect(category.id)}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    selectedCategory === category.id
+                      ? "border-indigo-500 bg-indigo-50"
+                      : "border-gray-200 bg-white hover:border-indigo-300"
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="text-2xl mb-2">{category.icon}</div>
+                  <h3 className="font-semibold text-gray-900">{category.name}</h3>
+                  <p className="text-sm text-gray-600">{categoryWords.length} words</p>
+                </motion.button>
+              );
+            })}
           </div>
         </div>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="text-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto text-indigo-600 mb-4" />
+            <p className="text-gray-600">Generating new vocabulary...</p>
+          </div>
+        )}
+
         {/* Word Card */}
-        {currentWord && (
+        {currentWord && !isLoading && (
           <motion.div
             key={currentWord.id}
             initial={{ opacity: 0, y: 20 }}
@@ -298,4 +387,4 @@ export default function VocabularyPage() {
       </div>
     </div>
   );
-} 
+}
