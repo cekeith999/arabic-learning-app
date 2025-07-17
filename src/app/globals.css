@@ -15,7 +15,7 @@
   --input: #ffffff;
   --ring: #4f46e5;
   --font-arabic: 'Noto Sans Arabic', 'Cairo', sans-serif;
-  --font-heading: 'Cairo, sans-serif;
+  --font-heading: 'Cairo', sans-serif;
 }
 
 @theme inline {
